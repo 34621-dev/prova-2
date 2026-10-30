@@ -1,0 +1,1711 @@
+# Prova de API em MVC com IA: Reserva de Salas da Escola
+
+| Duração | Grupo | IA | Conceitos |
+| --- | --- | --- | --- |
+| 45 minutos | Até 3 alunos | Liberada (opcional) | Camadas (Model, Repository, Service, Controller), regras de negócio, validação e status HTTP |
+
+## Como esta prova funciona
+
+Nesta prova vocês podem usar IA, e quem preferir fazer sem ela também pode. O que importa é mostrar **como a API foi construída**, não só o resultado.
+
+A nota tem duas partes:
+
+| Parte | Pontos | O que olhamos |
+| --- | --- | --- |
+| Produto | 6,0 | A API entregue: camadas, regras de negócio, validação e respostas HTTP |
+| Processo | 4,0 | O caminho: o que vocês pediram, em que ordem, o que conferiram e o que entenderam |
+
+Não tem passo a passo. O enunciado conta o problema e as regras. As rotas, os nomes e a ordem de construção são decisões de vocês.
+
+## A situação
+
+A escola quer uma API para controlar a reserva de suas salas: laboratórios, auditório, salas de aula. Cada sala tem um código, um nome e uma capacidade, e a escola precisa saber quais estão reservadas e quais estão livres.
+
+## O que a API precisa fazer
+
+- Cadastrar uma sala, listar todas, buscar uma pelo id e excluir.
+- Reservar uma sala e liberar uma sala.
+- Responder cada situação com o status HTTP certo: sucesso, criado, sem conteúdo, não encontrado, conflito e dados inválidos.
+
+## As regras da escola
+
+- Toda sala cadastrada começa livre.
+- O **código é único**: não pode haver duas salas com o mesmo código.
+- **Código e nome são obrigatórios**, e a **capacidade precisa ser maior que zero**.
+- Uma sala que já está reservada **não pode ser reservada de novo**.
+- Só pode ser liberada uma sala que **está reservada**.
+- Uma sala reservada **não pode ser excluída**.
+- Pedir, reservar, liberar ou excluir uma sala que não existe é um caso de "não encontrado".
+
+## O que o projeto precisa ter
+
+- O projeto **`Escola-base`**, que o professor entrega, e que vocês usam como ponto de partida. Ele já traz Spring Web, Spring Data JPA, validação e banco **H2 em memória**, e já sobe sem nenhuma classe de vocês. Não precisa criar projeto. O arquivo `README.md` dele explica como rodar.
+- Organização em camadas, **cada uma no seu pacote, criado por vocês** dentro de `src/main/java/escola`: `model`, `repository`, `service` e `controller`. O projeto base não traz essas pastas prontas.
+- As regras da escola ficam na **Service**. O **Controller** só recebe a requisição, chama a Service e devolve a resposta HTTP. O Controller não conversa direto com o Repository.
+- As rotas seguem o padrão REST. Vocês escolhem os nomes.
+
+## Roteiro de conferência
+
+Com o banco vazio (recém-iniciado), façam os pedidos abaixo na ordem. A primeira sala cadastrada recebe o id 1.
+
+| Passo | O que fazer | Status esperado |
+| --- | --- | --- |
+| 1 | Cadastrar a sala de código LAB-01, nome Lab Informatica, capacidade 30 | 201 |
+| 2 | Cadastrar outra sala com o mesmo código LAB-01 | 409 |
+| 3 | Cadastrar uma sala sem nome | 400 |
+| 4 | Reservar a sala 1 | 200 |
+| 5 | Reservar a sala 1 de novo | 409 |
+| 6 | Excluir a sala 1 (que está reservada) | 409 |
+| 7 | Liberar a sala 1 | 200 |
+| 8 | Liberar a sala 1 de novo | 409 |
+| 9 | Excluir a sala 1 | 204 |
+| 10 | Buscar a sala 1 | 404 |
+
+O `README.md` do projeto base já traz esta tabela com duas colunas a mais: **a rota que vocês usaram** e **o status que a API devolveu de verdade**. Preencham as duas. Se algum passo não bater, escrevam o que aconteceu.
+
+Como fazer os pedidos fica a critério de vocês (Postman, Insomnia, `curl`, arquivo `.http`, outro).
+
+> **Dica.** Se o JSON levar acento (por exemplo, "Laboratório"), alguns programas no Windows enviam o texto numa codificação que a API recusa com 400. Se isso acontecer num passo que deveria dar certo, testem sem acento antes de procurar erro no código.
+
+## Registro do processo: o arquivo PROMPTS.md
+
+O arquivo `PROMPTS.md` já está dentro do projeto base. Preencham **durante** a prova, não depois.
+
+- Registrem cada prompt **exatamente como foi enviado**, na ordem. Copiem e colem, não reescrevam.
+- Ao lado de cada prompt, escrevam em uma ou duas linhas o que a IA devolveu e o que vocês fizeram com a resposta (usaram, alteraram ou descartaram) e por quê.
+- Quem não usar IA também preenche o arquivo, descrevendo cada passo na ordem em que foi feito.
+- Nos 5 minutos finais, **sem consultar a IA**, respondam as três perguntas da seção "Perguntas finais", logo abaixo, na última parte do `PROMPTS.md`.
+
+O arquivo precisa se explicar sozinho: quem ler deve entender o caminho que vocês seguiram sem precisar perguntar nada.
+
+## Perguntas finais
+
+1. Quando chega um pedido de reservar uma sala, qual é o caminho até a resposta? Passe por cada camada (Controller, Service, Repository e Model).
+2. Por que a regra "uma sala reservada não pode ser reservada de novo" fica na Service e não no Controller?
+3. Se a escola trocar o H2 por outro banco de dados, quais classes precisam mudar? Por quê?
+
+## Sugestão de tempo
+
+| Minutos | O que fazer |
+| --- | --- |
+| 0 a 5 | Ler a prova e combinar como o grupo vai trabalhar |
+| 5 a 32 | Construir e testar a partir do projeto base, registrando os prompts |
+| 32 a 40 | Rodar o roteiro de conferência e preencher o README |
+| 40 a 45 | Responder as três perguntas, sem IA |
+
+Se o projeto não subir a tempo, entreguem o código mesmo assim e registrem no `PROMPTS.md` o que travou e o que tentaram. O processo também vale nota.
+
+## O que entregar
+
+Uma pasta por grupo, com:
+
+- o projeto `Escola-base` com o código de vocês, sem a pasta `target`;
+- o `README.md` do projeto, com os nomes dos integrantes e o roteiro de conferência preenchido;
+- o `PROMPTS.md` do projeto, preenchido.
+
+## Como será corrigida
+
+- [ ] Os pacotes das quatro camadas foram criados, cada um com a sua responsabilidade, e o Controller não usa o Repository.
+- [ ] As regras da escola estão na Service.
+- [ ] Cada situação responde com o status HTTP certo.
+- [ ] Os dados inválidos são recusados com 400.
+- [ ] O roteiro de conferência preenchido bate com o que o código faz.
+- [ ] O `PROMPTS.md` mostra o caminho: prompts na ordem, o que foi conferido e o que foi corrigido.
+- [ ] As respostas finais mostram que o grupo entende o que entregou.
+
+
+# PROMPTS: Grupo ____
+
+**Integrantes:**
+
+1.
+2.
+3.
+
+**Prova:** API em MVC (Reserva de Salas)
+
+**Usamos IA?** ( ) Sim  ( ) Não
+
+**Qual ferramenta e modelo (se usaram):**
+
+> Quem não usou IA: troque "prompt" por "passo". Em cada bloco abaixo, descreva o que vocês fizeram naquele passo, na ordem em que aconteceu, e preencha os outros campos do mesmo jeito.
+
+## Registro, na ordem
+
+Copie o bloco abaixo para cada prompt. Escreva o prompt exatamente como foi enviado.
+
+### Prompt 1
+
+**O prompt (cópia exata):**
+
+> 
+
+**O que a IA devolveu (uma ou duas linhas):**
+
+**O que fizemos com a resposta:** ( ) usamos como veio  ( ) alteramos  ( ) descartamos
+
+**Por quê (o que conferimos, o que mudamos):**
+
+### Prompt 2
+
+**O prompt (cópia exata):**
+
+> 
+
+**O que a IA devolveu (uma ou duas linhas):**
+
+**O que fizemos com a resposta:** ( ) usamos como veio  ( ) alteramos  ( ) descartamos
+
+**Por quê (o que conferimos, o que mudamos):**
+
+(continuem com quantos blocos precisarem)
+
+## Como conferimos
+
+Descrevam como vocês testaram o que ficou pronto. Colem aqui a saída do programa (POO) ou o resultado do roteiro (API) e digam se bateu com a tabela da prova. Se não bateu, digam o que fizeram.
+
+## Onde a IA errou, ou onde nós erramos
+
+Contem pelo menos um erro que apareceu durante a prova: o que era, como perceberam e como resolveram. Se não apareceu nenhum, expliquem como vocês têm certeza disso.
+
+## Respostas finais, sem consultar a IA
+
+Respondam com as suas palavras, nos últimos 5 minutos. Não copiem de lugar nenhum.
+
+**Pergunta 1:**
+
+**Pergunta 2:**
+
+**Pergunta 3:**
+
+O ChatGPT disse:
+Entendi! Você enviou a prova completa de API em MVC – Reserva de Salas da Escola, incluindo as regras, os testes obrigatórios e o modelo do PROMPTS.md.
+
+Posso ajudar vocês a desenvolver o projeto usando Java + Spring Boot, respeitando exatamente a estrutura exigida pelo professor.
+
+Podemos construir:
+
+Model: classe Sala, com id, código, nome, capacidade e status de reserva.
+
+Repository: acesso ao banco H2 usando Spring Data JPA.
+
+Service: implementação de todas as regras de negócio.
+
+Controller: rotas REST e respostas HTTP corretas.
+
+Testes: os 10 passos do roteiro de conferência.
+
+PROMPTS.md: registro organizado do uso da IA.
+
+Também posso explicar cada classe para que vocês consigam entender e apresentar o código.
+
+Por onde você quer começar: pela criação de todo o código da API ou pela explicação passo a passo de como desenvolver o projeto?
+
+
+Você disse:
+criacao de todo o codigo explicando como faz
+
+O ChatGPT disse:
+Vamos desenvolver a API completa de Reserva de Salas da Escola, usando Java e Spring Boot, seguindo exatamente o que o professor pediu.
+
+Vou mostrar o código de cada arquivo, explicar para que serve e indicar onde criá-lo dentro do projeto Escola-base.
+
+A ideia é que vocês consigam copiar o código, executar, testar e principalmente entender o que estão entregando.
+
+1. Estrutura do projeto
+Abra o projeto Escola-base no IntelliJ ou VS Code.
+
+Dentro de src/main/java/escola, criem quatro pacotes:
+
+Escola-base
+
+src/main/java/escola
+
+model
+
+Sala.java
+
+repository
+
+SalaRepository.java
+
+service
+
+SalaService.java
+
+controller
+
+SalaController.java
+
+src/main/resources
+
+application.properties
+
+O que cada camada faz?
+
+Camada
+
+Responsabilidade
+
+Model
+
+Representa uma sala.
+
+Repository
+
+Conversa com o banco de dados.
+
+Service
+
+Executa as regras de negócio.
+
+Controller
+
+Recebe as requisições e responde HTTP.
+
+2. Model – Classe Sala
+Crie o arquivo Sala.java dentro do pacote model.
+
+Essa classe representa uma sala da escola.
+
+
+java
+
+package escola.model;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+
+@Entity
+public class Sala {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @NotBlank(message = "O código é obrigatório")
+    @Column(unique = true, nullable = false)
+    private String codigo;
+
+    @NotBlank(message = "O nome é obrigatório")
+    @Column(nullable = false)
+    private String nome;
+
+    @Min(value = 1, message = "A capacidade deve ser maior que zero")
+    private int capacidade;
+
+    private boolean reservada = false;
+
+    public Sala() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getCodigo() {
+        return codigo;
+    }
+
+    public void setCodigo(String codigo) {
+        this.codigo = codigo;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public int getCapacidade() {
+        return capacidade;
+    }
+
+    public void setCapacidade(int capacidade) {
+        this.capacidade = capacidade;
+    }
+
+    public boolean isReservada() {
+        return reservada;
+    }
+
+    public void setReservada(boolean reservada) {
+        this.reservada = reservada;
+    }
+}
+Explicação:
+
+@Entity: informa ao Spring/JPA que essa classe representa uma tabela no banco.
+
+@Id: identifica o campo que será a chave primária.
+
+@GeneratedValue: gera o ID automaticamente.
+
+@NotBlank: impede código ou nome vazio.
+
+@Column(unique = true): impede códigos duplicados no banco.
+
+@Min(1): exige capacidade maior ou igual a 1.
+
+reservada = false: toda sala começa livre.
+
+3. Repository – Acesso ao banco
+Crie SalaRepository.java no pacote repository.
+
+
+java
+
+package escola.repository;
+
+import escola.model.Sala;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface SalaRepository extends JpaRepository<Sala, Long> {
+
+    boolean existsByCodigo(String codigo);
+
+}
+Explicação:
+
+O JpaRepository já oferece vários métodos prontos:
+
+save(): cadastra ou atualiza uma sala.
+
+findAll(): lista todas as salas.
+
+findById(): procura pelo ID.
+
+delete(): exclui uma sala.
+
+existsByCodigo(): verifica se já existe uma sala com determinado código.
+
+Não precisamos criar manualmente as operações básicas do banco.
+
+4. Service – Regras de negócio
+Essa é uma das partes mais importantes da prova.
+
+Crie SalaService.java dentro do pacote service.
+
+Aqui ficam as regras da escola, como impedir reservas duplicadas e impedir a exclusão de salas reservadas.
+
+
+java
+
+package escola.service;
+
+import escola.model.Sala;
+import escola.repository.SalaRepository;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class SalaService {
+
+    private final SalaRepository repository;
+
+    public SalaService(SalaRepository repository) {
+        this.repository = repository;
+    }
+
+    // Cadastrar sala
+    public Sala cadastrar(Sala sala) {
+
+        if (repository.existsByCodigo(sala.getCodigo())) {
+            throw new RuntimeException("Código já cadastrado");
+        }
+
+        sala.setReservada(false);
+
+        return repository.save(sala);
+    }
+
+    // Listar todas as salas
+    public List<Sala> listar() {
+        return repository.findAll();
+    }
+
+    // Buscar sala pelo ID
+    public Sala buscarPorId(Long id) {
+
+        return repository.findById(id)
+                .orElseThrow(() ->
+                    new RuntimeException("Sala não encontrada"));
+    }
+
+    // Reservar sala
+    public Sala reservar(Long id) {
+
+        Sala sala = buscarPorId(id);
+
+        if (sala.isReservada()) {
+            throw new IllegalStateException(
+                "Esta sala já está reservada");
+        }
+
+        sala.setReservada(true);
+
+        return repository.save(sala);
+    }
+
+    // Liberar sala
+    public Sala liberar(Long id) {
+
+        Sala sala = buscarPorId(id);
+
+        if (!sala.isReservada()) {
+            throw new IllegalStateException(
+                "Esta sala já está livre");
+        }
+
+        sala.setReservada(false);
+
+        return repository.save(sala);
+    }
+
+    // Excluir sala
+    public void excluir(Long id) {
+
+        Sala sala = buscarPorId(id);
+
+        if (sala.isReservada()) {
+            throw new IllegalStateException(
+                "Não é possível excluir uma sala reservada");
+        }
+
+        repository.delete(sala);
+    }
+}
+Entendendo as regras:
+
+Situação
+
+O que acontece
+
+Código repetido
+
+Impede cadastro.
+
+Sala já reservada
+
+Impede nova reserva.
+
+Sala livre
+
+Impede liberação.
+
+Sala reservada
+
+Impede exclusão.
+
+ID inexistente
+
+Informa que a sala não existe.
+
+Perceba que o Controller não decide essas regras. A Service é responsável por isso.
+
+5. Controller – Rotas da API
+Agora vamos criar SalaController.java dentro do pacote controller.
+
+O Controller recebe os pedidos do usuário, chama a Service e devolve a resposta HTTP.
+
+Vamos utilizar estas rotas:
+
+Método HTTP
+
+Rota
+
+Função
+
+POST
+
+/salas
+
+Cadastrar sala
+
+GET
+
+/salas
+
+Listar salas
+
+GET
+
+/salas/{id}
+
+Buscar sala
+
+DELETE
+
+/salas/{id}
+
+Excluir sala
+
+PUT
+
+/salas/{id}/reservar
+
+Reservar sala
+
+PUT
+
+/salas/{id}/liberar
+
+Liberar sala
+
+Crie o arquivo:
+
+
+java
+
+package escola.controller;
+
+import escola.model.Sala;
+import escola.service.SalaService;
+
+import jakarta.validation.Valid;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/salas")
+public class SalaController {
+
+    private final SalaService service;
+
+    public SalaController(SalaService service) {
+        this.service = service;
+    }
+
+    // Cadastrar sala
+    @PostMapping
+    public ResponseEntity<Sala> cadastrar(
+            @Valid @RequestBody Sala sala) {
+
+        Sala novaSala = service.cadastrar(sala);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(novaSala);
+    }
+
+    // Listar salas
+    @GetMapping
+    public ResponseEntity<List<Sala>> listar() {
+
+        return ResponseEntity.ok(service.listar());
+    }
+
+    // Buscar sala pelo ID
+    @GetMapping("/{id}")
+    public ResponseEntity<Sala> buscar(@PathVariable Long id) {
+
+        return ResponseEntity.ok(service.buscarPorId(id));
+    }
+
+    // Reservar sala
+    @PutMapping("/{id}/reservar")
+    public ResponseEntity<Sala> reservar(@PathVariable Long id) {
+
+        return ResponseEntity.ok(service.reservar(id));
+    }
+
+    // Liberar sala
+    @PutMapping("/{id}/liberar")
+    public ResponseEntity<Sala> liberar(@PathVariable Long id) {
+
+        return ResponseEntity.ok(service.liberar(id));
+    }
+
+    // Excluir sala
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> excluir(@PathVariable Long id) {
+
+        service.excluir(id);
+
+        return ResponseEntity.noContent().build();
+    }
+}
+Explicação dos principais comandos:
+
+@RestController: transforma a classe em um controlador REST.
+
+@RequestMapping("/salas"): define o endereço principal.
+
+@PostMapping: recebe cadastros.
+
+@GetMapping: recebe consultas.
+
+@PutMapping: atualiza o estado da sala.
+
+@DeleteMapping: exclui uma sala.
+
+@RequestBody: recebe os dados JSON.
+
+@PathVariable: recebe o ID informado na URL.
+
+@Valid: executa as validações da Model.
+
+ResponseEntity: permite controlar o status HTTP.
+
+6. Tratamento de erros HTTP
+Esta etapa é muito importante para a prova.
+
+Precisamos garantir que a API responda:
+
+400: dados inválidos.
+
+404: sala não encontrada.
+
+409: conflito, como reservar uma sala já reservada.
+
+Para isso, vamos criar mais uma classe dentro do pacote controller, chamada TratamentoErros.java.
+
+Primeiro, façam uma pequena alteração na Service.
+
+No método cadastrar, substituam:
+
+
+java
+throw new RuntimeException("Código já cadastrado");
+Por:
+
+
+java
+throw new IllegalStateException("Código já cadastrado");
+Assim, tanto o código duplicado quanto as outras regras de conflito serão tratados como HTTP 409.
+
+Agora criem TratamentoErros.java:
+
+
+java
+
+package escola.controller;
+
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.Map;
+
+@RestControllerAdvice
+public class TratamentoErros {
+
+    // Dados inválidos: 400
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, String>> dadosInvalidos(
+            MethodArgumentNotValidException erro) {
+
+        String mensagem = erro.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .findFirst()
+                .map(e -> e.getDefaultMessage())
+                .orElse("Dados inválidos");
+
+        return ResponseEntity
+                .badRequest()
+                .body(Map.of("erro", mensagem));
+    }
+
+    // Conflitos: 409
+    @ExceptionHandler({
+        IllegalStateException.class,
+        DataIntegrityViolationException.class
+    })
+    public ResponseEntity<Map<String, String>> conflito(
+            RuntimeException erro) {
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(Map.of("erro", erro.getMessage() == null
+                        ? "Conflito"
+                        : erro.getMessage()));
+    }
+
+    // Sala não encontrada: 404
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, String>> naoEncontrado(
+            RuntimeException erro) {
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(Map.of("erro", erro.getMessage()));
+    }
+}
+Como funciona?
+
+A anotação @RestControllerAdvice permite tratar erros que acontecem em diferentes Controllers.
+
+Por exemplo:
+
+O usuário tenta reservar a sala 1.
+
+O Controller chama a Service.
+
+A Service percebe que ela já está reservada.
+
+A Service lança uma exceção.
+
+O TratamentoErros captura a exceção e responde com HTTP 409.
+
+Isso evita colocar regras de negócio dentro do Controller.
+
+7. Configuração do banco H2
+Abra:
+
+src/main/resources/application.properties
+
+Se o arquivo já tiver configurações, confira antes de substituir. Para o banco em memória, podemos utilizar:
+
+
+properties
+
+spring.application.name=Escola-base
+
+spring.datasource.url=jdbc:h2:mem:escola
+spring.datasource.driver-class-name=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=
+
+spring.jpa.hibernate.ddl-auto=create-drop
+spring.jpa.show-sql=true
+
+spring.h2.console.enabled=true
+spring.h2.console.path=/h2-console
+O que isso faz?
+
+jdbc:h2:mem:escola: cria um banco em memória.
+
+ddl-auto=create-drop: cria as tabelas ao iniciar e apaga ao encerrar.
+
+show-sql=true: mostra os comandos SQL no console.
+
+h2.console.enabled=true: habilita o console do H2.
+
+Atenção: ao reiniciar a aplicação, os dados serão apagados. Isso é esperado para a prova.
+
+8. Executando o projeto
+Agora vamos testar se tudo está funcionando.
+
+Abra a classe principal do projeto, provavelmente EscolaBaseApplication.java.
+
+Clique em Run (ou execute pelo terminal).
+
+Aguarde o Spring Boot iniciar.
+
+Confira se aparece uma mensagem semelhante a:
+
+
+text
+Started EscolaBaseApplication
+Se aparecer, a aplicação iniciou.
+
+O endereço padrão será:
+
+
+text
+http://localhost:8080
+9. Testando a API
+Podem utilizar Postman, Insomnia ou o arquivo .http do IntelliJ.
+
+Vamos usar o Postman como exemplo.
+
+Teste 1 – Cadastrar uma sala
+POST — 201 Created
+URL:
+
+
+text
+http://localhost:8080/salas
+Body → raw → JSON:
+
+
+json
+{
+    "codigo": "LAB-01",
+    "nome": "Lab Informatica",
+    "capacidade": 30
+}
+Resposta esperada:
+
+
+json
+{
+    "id": 1,
+    "codigo": "LAB-01",
+    "nome": "Lab Informatica",
+    "capacidade": 30,
+    "reservada": false
+}
+Teste 2 – Cadastrar código repetido
+POST — 409 Conflict
+Envie novamente o mesmo JSON.
+
+Resposta esperada:
+
+
+json
+{
+    "erro": "Código já cadastrado"
+}
+Teste 3 – Cadastrar sem nome
+POST — 400 Bad Request
+
+json
+{
+    "codigo": "LAB-02",
+    "capacidade": 30
+}
+Resposta esperada:
+
+
+json
+{
+    "erro": "O nome é obrigatório"
+}
+Teste 4 – Reservar a sala 1
+PUT — 200 OK
+
+text
+http://localhost:8080/salas/1/reservar
+Resposta esperada:
+
+
+json
+{
+    "id": 1,
+    "codigo": "LAB-01",
+    "nome": "Lab Informatica",
+    "capacidade": 30,
+    "reservada": true
+}
+Teste 5 – Reservar novamente
+PUT — 409 Conflict
+
+text
+http://localhost:8080/salas/1/reservar
+A API deve informar que a sala já está reservada.
+
+Teste 6 – Excluir sala reservada
+DELETE — 409 Conflict
+
+text
+http://localhost:8080/salas/1
+A API deve impedir a exclusão.
+
+Teste 7 – Liberar sala
+PUT — 200 OK
+
+text
+http://localhost:8080/salas/1/liberar
+A resposta deve mostrar:
+
+
+json
+{
+    "id": 1,
+    "codigo": "LAB-01",
+    "nome": "Lab Informatica",
+    "capacidade": 30,
+    "reservada": false
+}
+Teste 8 – Liberar novamente
+PUT — 409 Conflict
+
+text
+http://localhost:8080/salas/1/liberar
+A API deve informar que a sala já está livre.
+
+Teste 9 – Excluir sala
+DELETE — 204 No Content
+
+text
+http://localhost:8080/salas/1
+A resposta deve ser vazia, com status 204.
+
+Teste 10 – Buscar sala excluída
+GET — 404 Not Found
+
+text
+http://localhost:8080/salas/1
+A API deve informar que a sala não foi encontrada.
+
+10. Testando outras rotas
+Também é importante testar as duas consultas:
+
+Listar todas as salas
+
+
+http
+GET http://localhost:8080/salas
+Buscar uma sala pelo ID
+
+
+http
+GET http://localhost:8080/salas/1
+E testar capacidade inválida:
+
+
+json
+{
+    "codigo": "LAB-03",
+    "nome": "Laboratorio",
+    "capacidade": 0
+}
+O resultado esperado é HTTP 400.
+
+11. Conferindo se a API atende à prova
+Esta é a tabela que vocês devem preencher no README.md.
+
+Passo
+
+Operação
+
+Status esperado
+
+1
+
+Cadastrar LAB-01
+
+201
+
+2
+
+Código duplicado
+
+409
+
+3
+
+Nome vazio
+
+400
+
+4
+
+Reservar sala 1
+
+200
+
+5
+
+Reservar novamente
+
+409
+
+6
+
+Excluir reservada
+
+409
+
+7
+
+Liberar sala
+
+200
+
+8
+
+Liberar novamente
+
+409
+
+9
+
+Excluir sala
+
+204
+
+10
+
+Buscar excluída
+
+404
+
+Importante: esses são os resultados esperados pelo código. Vocês precisam executar os testes e preencher os resultados reais no README. Se algum não bater, investiguem antes de considerar concluído.
+
+12. Como preencher o PROMPTS.md
+Como vocês estão utilizando IA, registrem os pedidos exatamente como foram enviados.
+
+Por exemplo, para esta etapa:
+
+Escrita
+
+
+Prompt 1
+O prompt (cópia exata):
+
+criacao de todo o codigo explicando como faz
+O que a IA devolveu (uma ou duas linhas):
+
+A IA apresentou a estrutura MVC da API e explicou como criar as classes Model, Repository, Service e Controller, além das configurações e dos testes.
+
+O que fizemos com a resposta: ( X ) usamos como veio ( ) alteramos ( ) descartamos
+
+Por quê (o que conferimos, o que mudamos):
+
+Conferimos os pacotes, os códigos e as regras exigidas pelo professor. Vamos executar a aplicação e testar as rotas para verificar se tudo funciona.
+
+Não esqueçam de registrar também os próximos pedidos que fizerem à IA, na ordem em que acontecerem.
+
+13. Entendendo as três perguntas finais
+O professor quer verificar se vocês realmente entenderam o projeto.
+
+Lembrem-se destes conceitos para estudar:
+
+Controller: recebe a requisição e chama a Service.
+
+Service: verifica as regras de negócio.
+
+Repository: acessa o banco de dados.
+
+Model: representa os dados da sala.
+
+Não preencham as três respostas finais copiando da IA: o enunciado pede expressamente que sejam respondidas sem consulta nos últimos cinco minutos.
+
+Checklist antes de entregar
+Progresso da entrega
+
+0/11
+
+Criei o pacote model e a classe Sala.java
+
+Criei o pacote repository e a classe SalaRepository.java
+
+Criei o pacote service e a classe SalaService.java
+
+Criei o pacote controller e a classe SalaController.java
+
+Criei a classe TratamentoErros.java
+
+Conferi a configuração do banco H2
+
+Executei a aplicação sem erros
+
+Testei as 10 operações da prova
+
+Preenchi o README.md com os resultados reais
+
+Preenchi o PROMPTS.md
+
+Respondi às três perguntas finais sem consultar IA
+Uma última observação: o código foi elaborado para Spring Boot 3, usando imports jakarta. Se o projeto base utilizar Spring Boot 2, alguns imports precisarão ser adaptados para javax.
+
+Minha recomendação é montar e executar cada camada antes de passar para a próxima. Assim, se aparecer algum erro, fica muito mais fácil descobrir onde está o problema.
+
+
+Orientações sob medida para sua vida
+Entre para receber orientação personalizada, passo a passo.
+
+
+Entrar
+
+Cadastre-se grátis
+Você disse:
+teste para ver se realmente funciona, se não tem enhum erro
+
+O ChatGPT disse:
+Vou fazer uma revisão técnica do código que montamos, verificando os possíveis erros de compilação e se os 10 testes da prova realmente funcionam.
+
+Encontrei alguns pontos que precisam ser corrigidos antes de considerar a API pronta. Principalmente no tratamento de erros e na validação dos dados.
+
+Não consigo executar o seu projeto local diretamente sem os arquivos, mas consigo revisar a implementação e corrigir os problemas identificáveis.
+
+1. Problemas encontrados
+Ponto
+
+Problema
+
+Correção
+
+Código duplicado
+
+A exceção precisa ser classificada como conflito.
+
+Tratar como 409.
+
+Sala inexistente
+
+Não pode ser confundida com outro erro.
+
+Criar exceção específica para 404.
+
+Capacidade negativa
+
+@Min(1) resolve, mas precisa de @Valid.
+
+Manter a validação.
+
+Código com espaços
+
+Pode passar pela validação se não houver tratamento adequado.
+
+Usar @NotBlank.
+
+Excluir sala reservada
+
+Precisa bloquear a exclusão na Service.
+
+Manter a regra.
+
+Erro de banco
+
+Uma violação de unicidade também precisa retornar 409.
+
+Tratar a exceção.
+
+Vamos melhorar o código para ficar mais confiável.
+
+2. Corrigindo as exceções
+Vamos criar dois arquivos dentro do pacote service.
+
+Arquivo SalaNaoEncontradaException.java:
+
+
+java
+
+package escola.service;
+
+public class SalaNaoEncontradaException extends RuntimeException {
+
+    public SalaNaoEncontradaException(String mensagem) {
+        super(mensagem);
+    }
+}
+Arquivo ConflitoException.java:
+
+
+java
+
+package escola.service;
+
+public class ConflitoException extends RuntimeException {
+
+    public ConflitoException(String mensagem) {
+        super(mensagem);
+    }
+}
+Assim, teremos dois erros diferentes:
+
+SalaNaoEncontradaException: quando o ID não existe.
+
+ConflitoException: quando uma operação viola uma regra da escola.
+
+3. Service corrigida
+Substitua o conteúdo de SalaService.java por este:
+
+
+java
+
+package escola.service;
+
+import escola.model.Sala;
+import escola.repository.SalaRepository;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class SalaService {
+
+    private final SalaRepository repository;
+
+    public SalaService(SalaRepository repository) {
+        this.repository = repository;
+    }
+
+    public Sala cadastrar(Sala sala) {
+
+        if (repository.existsByCodigo(sala.getCodigo())) {
+            throw new ConflitoException("Código já cadastrado");
+        }
+
+        sala.setReservada(false);
+
+        return repository.save(sala);
+    }
+
+    public List<Sala> listar() {
+        return repository.findAll();
+    }
+
+    public Sala buscarPorId(Long id) {
+
+        return repository.findById(id)
+                .orElseThrow(() ->
+                    new SalaNaoEncontradaException(
+                        "Sala não encontrada"));
+    }
+
+    public Sala reservar(Long id) {
+
+        Sala sala = buscarPorId(id);
+
+        if (sala.isReservada()) {
+            throw new ConflitoException(
+                "Esta sala já está reservada");
+        }
+
+        sala.setReservada(true);
+
+        return repository.save(sala);
+    }
+
+    public Sala liberar(Long id) {
+
+        Sala sala = buscarPorId(id);
+
+        if (!sala.isReservada()) {
+            throw new ConflitoException(
+                "Esta sala já está livre");
+        }
+
+        sala.setReservada(false);
+
+        return repository.save(sala);
+    }
+
+    public void excluir(Long id) {
+
+        Sala sala = buscarPorId(id);
+
+        if (sala.isReservada()) {
+            throw new ConflitoException(
+                "Não é possível excluir uma sala reservada");
+        }
+
+        repository.delete(sala);
+    }
+}
+4. Tratamento de erros corrigido
+Substitua TratamentoErros.java por:
+
+
+java
+
+package escola.controller;
+
+import escola.service.ConflitoException;
+import escola.service.SalaNaoEncontradaException;
+
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.Map;
+
+@RestControllerAdvice
+public class TratamentoErros {
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, String>> dadosInvalidos(
+            MethodArgumentNotValidException erro) {
+
+        String mensagem = erro.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .findFirst()
+                .map(e -> e.getDefaultMessage())
+                .orElse("Dados inválidos");
+
+        return ResponseEntity.badRequest()
+                .body(Map.of("erro", mensagem));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, String>> jsonInvalido(
+            HttpMessageNotReadableException erro) {
+
+        return ResponseEntity.badRequest()
+                .body(Map.of("erro", "JSON inválido"));
+    }
+
+    @ExceptionHandler(ConflitoException.class)
+    public ResponseEntity<Map<String, String>> conflito(
+            ConflitoException erro) {
+
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of("erro", erro.getMessage()));
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, String>> integridade(
+            DataIntegrityViolationException erro) {
+
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of("erro", "Conflito nos dados cadastrados"));
+    }
+
+    @ExceptionHandler(SalaNaoEncontradaException.class)
+    public ResponseEntity<Map<String, String>> naoEncontrado(
+            SalaNaoEncontradaException erro) {
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("erro", erro.getMessage()));
+    }
+}
+Agora não existe mais o problema de qualquer erro inesperado ser automaticamente classificado como 404.
+
+5. Model: conferência da validação
+Confirme que sua classe Sala.java tem estas anotações:
+
+
+java
+@NotBlank(message = "O código é obrigatório")
+@Column(unique = true, nullable = false)
+private String codigo;
+
+@NotBlank(message = "O nome é obrigatório")
+@Column(nullable = false)
+private String nome;
+
+@Min(value = 1, message = "A capacidade deve ser maior que zero")
+private int capacidade;
+E no Controller, o cadastro precisa ter:
+
+
+java
+public ResponseEntity<Sala> cadastrar(
+        @Valid @RequestBody Sala sala)
+Sem @Valid, as validações não serão executadas nessa requisição.
+
+6. Teste completo dos 10 passos
+Depois de salvar as alterações, reinicie o Spring Boot.
+
+Façam os testes nesta ordem, sem reiniciar a aplicação entre eles.
+
+Checklist de testes
+
+0/10 conferidos
+Teste 1 — POST
+
+Esperado: 201
+
+/salas
+
+
+Passou
+
+Falhou
+
+Não testei
+Teste 2 — POST
+
+Esperado: 409
+
+/salas
+
+
+Passou
+
+Falhou
+
+Não testei
+Teste 3 — POST
+
+Esperado: 400
+
+/salas
+
+
+Passou
+
+Falhou
+
+Não testei
+Teste 4 — PUT
+
+Esperado: 200
+
+/salas/1/reservar
+
+
+Passou
+
+Falhou
+
+Não testei
+Teste 5 — PUT
+
+Esperado: 409
+
+/salas/1/reservar
+
+
+Passou
+
+Falhou
+
+Não testei
+Teste 6 — DELETE
+
+Esperado: 409
+
+/salas/1
+
+
+Passou
+
+Falhou
+
+Não testei
+Teste 7 — PUT
+
+Esperado: 200
+
+/salas/1/liberar
+
+
+Passou
+
+Falhou
+
+Não testei
+Teste 8 — PUT
+
+Esperado: 409
+
+/salas/1/liberar
+
+
+Passou
+
+Falhou
+
+Não testei
+Teste 9 — DELETE
+
+Esperado: 204
+
+/salas/1
+
+
+Passou
+
+Falhou
+
+Não testei
+Teste 10 — GET
+
+Esperado: 404
+
+/salas/1
+
+
+Passou
+
+Falhou
+
+Não testei
+7. Conferindo a compilação
+No terminal, dentro da pasta do projeto, executem:
+
+Windows:
+
+
+bash
+mvnw.cmd clean test
+Linux ou macOS:
+
+
+bash
+./mvnw clean test
+Se não houver Maven Wrapper, utilizem:
+
+
+bash
+mvn clean test
+O resultado esperado é:
+
+
+text
+BUILD SUCCESS
+Isso verifica compilação e testes automatizados existentes, mas não substitui os dez testes HTTP.
+
+8. Minha avaliação final
+Correções propostas
+Separação das quatro camadas: correta.
+
+Regras de reserva e liberação: corretas.
+
+Exclusão de sala reservada: correta.
+
+Validação de dados: prevista.
+
+Tratamento de 400, 404 e 409: corrigido na proposta.
+
+Status 200, 201 e 204: previstos no Controller.
+
+Ainda não posso afirmar que o projeto inteiro está sem erros, porque não tenho acesso aos arquivos reais do Escola-base nem executei a aplicação.
+
+Quero conferir o projeto de verdade
+Envie aqui o arquivo ZIP da pasta Escola-base (pode retirar a pasta target).
+
+Vou poder revisar:
+
+Se todos os arquivos compilam.
+
+Se os pacotes e imports estão corretos.
+
+Se existe algum conflito com as configurações do projeto original.
+
+Se as rotas devolvem os status esperados.
+
+Se há algum erro que possa prejudicar a nota.
+
+Assim podemos chegar a uma versão realmente conferida, em vez de entregar apenas um código que parece correto.
+
+
+Você disse:
+teste de novo para ver se funciona
+
+O ChatGPT disse:
+Vamos testar novamente, agora considerando a versão corrigida do código.
+
+Fiz uma nova revisão lógica do fluxo das operações. Há um detalhe importante: ainda não consigo executar o Spring Boot sem receber os arquivos do projeto, então não vou afirmar que passou em testes reais.
+
+1. Simulação dos 10 testes
+Considerando o banco H2 recém-iniciado:
+
+Passo
+
+Operação
+
+Resultado previsto
+
+Situação
+
+1
+
+Cadastrar LAB-01
+
+201
+
+Correto
+
+2
+
+Repetir LAB-01
+
+409
+
+Correto
+
+3
+
+Cadastrar sem nome
+
+400
+
+Correto
+
+4
+
+Reservar sala 1
+
+200
+
+Correto
+
+5
+
+Reservar novamente
+
+409
+
+Correto
+
+6
+
+Excluir reservada
+
+409
+
+Correto
+
+7
+
+Liberar sala 1
+
+200
+
+Correto
+
+8
+
+Liberar novamente
+
+409
+
+Correto
+
+9
+
+Excluir sala 1
+
+204
+
+Correto
+
+10
+
+Buscar sala excluída
+
+404
+
+Correto
+
+Esses resultados são uma simulação baseada no código, não resultados de execução.
+
+2. Mais dois problemas que precisamos prevenir
+Problema 1 — Capacidade negativa ou nula
+
+O campo int capacidade impede que o valor seja nulo no Java, mas é importante manter @Min(1) para rejeitar zero e números negativos.
+
+Problema 2 — Código com espaços
+
+O @NotBlank rejeita espaços vazios, mas não remove espaços extras de códigos válidos. Por exemplo, LAB-01 pode ser tratado como um código diferente de LAB-01.
+
+Para evitar isso, acrescentem no cadastro da Service:
+
+
+java
+sala.setCodigo(sala.getCodigo().trim());
+sala.setNome(sala.getNome().trim());
+Façam isso antes de verificar se o código já existe.
+
+3. Teste de compilação
+Executem:
+
+
+bash
+mvnw.cmd clean test
+Se aparecer:
+
+
+text
+BUILD SUCCESS
+a compilação e os testes automatizados existentes passaram.
+
+4. Quero testar o código real
+Envie o Escola-base.zip
+
+Pode enviar o projeto sem a pasta target. Vou revisar os arquivos reais e identificar erros de compilação, configuração, validação e funcionamento das rotas.
+
+Minha recomendação: não entreguem ainda sem executar os testes. Quero conferir o projeto real para evitar que vocês percam pontos por um erro pequeno.
